@@ -1,0 +1,27 @@
+Teach me [TOPIC].
+
+Teach me .NET Clean Architecture 
+
+Answer these questions:
+
+What is it?
+Why was it created?
+What problem does it solve?
+Who uses it?
+Where is it used?
+When should I use it?
+Which concepts are most important?
+How does it work?
+How is it implemented?
+How is it secured?
+How is it scaled?
+What are the real-world use cases?
+What are the common mistakes?
+How would a Solution Architect explain and design it?
+Give examples, architecture diagrams, best practices, and a project.
+Core Concepts with real examples
+Architectural Patterns with real examples
+Enterprise Use Cases with real examples
+Practical Example with real examples
+Quick Gist with real examples
+Expert-Level Interview Questions & Answers" with real examples
