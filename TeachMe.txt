@@ -1,4 +1,4 @@
-Teach me .NET Clean Architecture as a complete, practical, and architect-level guide.
+Teach me [Retrieval-Augmented Generation (RAG)] as a complete, practical, and architect-level guide.
 
 Return Markdown syntax only. Do not include a preface, apology, or explanation
 outside the guide. Use clear headings, tables when useful, bullet lists, code
