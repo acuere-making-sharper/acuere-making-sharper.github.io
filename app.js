@@ -2,18 +2,24 @@
   'use strict';
 
   angular.module('acuereApp', [])
-    .controller('ReaderController', ['$http', '$q', '$sce', '$scope', '$timeout', function ($http, $q, $sce, $scope, $timeout) {
+    .controller('ReaderController', ['$http', '$interval', '$q', '$sce', '$scope', '$timeout', function ($http, $interval, $q, $sce, $scope, $timeout) {
       var contentCache = {};
       var searchIndex = [];
       var indexingPromise;
       var searchTimer;
       var searchRequestId = 0;
+      var placeholderTimer;
+      var placeholderIndex = 0;
+      var placeholderExamples = [];
+      var placeholderPosition = 0;
+      var deletingPlaceholder = false;
       var selectedGuide = new URLSearchParams(window.location.search).get('guide');
 
       $scope.guides = [];
       $scope.quickLinks = [];
       $scope.selectedGuide = selectedGuide;
       $scope.searchQuery = '';
+      $scope.searchPlaceholder = 'e.g. Explore a guide';
       $scope.autocompleteResults = [];
       $scope.searchResults = [];
       $scope.view = 'loading';
@@ -136,9 +142,36 @@
         searchTimer = $timeout($scope.searchGuides, 300);
       };
 
+      placeholderTimer = $interval(function () {
+        if ($scope.searchQuery || !placeholderExamples.length) return;
+        var phrase = placeholderExamples[placeholderIndex];
+        if (!deletingPlaceholder) {
+          placeholderPosition += 1;
+          $scope.searchPlaceholder = phrase.slice(0, placeholderPosition);
+          if (placeholderPosition >= phrase.length) deletingPlaceholder = true;
+        } else {
+          placeholderPosition -= 1;
+          $scope.searchPlaceholder = phrase.slice(0, placeholderPosition);
+          if (placeholderPosition <= 0) {
+            deletingPlaceholder = false;
+            placeholderIndex = (placeholderIndex + 1) % placeholderExamples.length;
+          }
+        }
+      }, 70);
+
+      $scope.$on('$destroy', function () {
+        $interval.cancel(placeholderTimer);
+        if (searchTimer) $timeout.cancel(searchTimer);
+      });
+
       $http.get('data.json').then(function (response) {
         $scope.guides = response.data.guides || [];
         $scope.quickLinks = response.data.quickLinks || [];
+        placeholderExamples = $scope.guides.map(function (guide) { return 'e.g. Explore ' + guide.title; });
+        placeholderIndex = 0;
+        placeholderPosition = placeholderExamples.length ? placeholderExamples[0].length : 0;
+        deletingPlaceholder = placeholderExamples.length > 0;
+        $scope.searchPlaceholder = placeholderExamples[0] || 'e.g. Explore a guide';
         refreshIcons();
         if (!selectedGuide) {
           $scope.view = 'home';
