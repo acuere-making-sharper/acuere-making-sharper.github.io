@@ -14,6 +14,7 @@
       $scope.quickLinks = [];
       $scope.selectedGuide = selectedGuide;
       $scope.searchQuery = '';
+      $scope.autocompleteResults = [];
       $scope.searchResults = [];
       $scope.view = 'loading';
 
@@ -50,6 +51,12 @@
         return contentCache[file];
       }
 
+      function refreshIcons() {
+        $timeout(function () {
+          if (window.lucide) window.lucide.createIcons();
+        }, 0);
+      }
+
       function buildSearchIndex() {
         if (indexingPromise) return indexingPromise;
         indexingPromise = $q.all($scope.guides.map(function (guide) {
@@ -65,13 +72,23 @@
         return guide && guide.slug ? new URL(guide.slug, window.location.origin + '/').href : new URL('index.html?guide=' + encodeURIComponent(file), window.location.href).href;
       };
 
+      $scope.highlightMatch = function (value) {
+        var safeValue = escapeHtml(value || '');
+        var query = ($scope.searchQuery || '').trim();
+        if (!query) return $sce.trustAsHtml(safeValue);
+        var safeQuery = escapeHtml(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return $sce.trustAsHtml(safeValue.replace(new RegExp(safeQuery, 'ig'), '<mark>$&</mark>'));
+      };
+
       $scope.loadGuide = function (file) {
+        $scope.autocompleteResults = [];
         $scope.selectedGuide = file;
         $scope.view = 'loading';
         fetchGuide(file).then(function (markdown) {
           $scope.guideHtml = $sce.trustAsHtml(markdownToHtml(markdown));
           $scope.view = 'guide';
           document.title = 'Guide - Acuere';
+          refreshIcons();
           $timeout(function () {
             var reader = document.getElementById('guide-reader');
             if (reader) reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -97,6 +114,7 @@
         if (searchIndex.length === $scope.guides.length) {
           $scope.searchResults = searchIndex.filter(function (item) { return item.text.indexOf(query) !== -1; }).map(function (item) { return item.guide; });
           $scope.searching = false;
+          refreshIcons();
           return;
         }
         $scope.searching = true;
@@ -104,10 +122,16 @@
           if (requestId !== searchRequestId) return;
           $scope.searchResults = searchIndex.filter(function (item) { return item.text.indexOf(query) !== -1; }).map(function (item) { return item.guide; });
           $scope.searching = false;
+          refreshIcons();
         });
       };
 
       $scope.queueSearch = function () {
+        var query = ($scope.searchQuery || '').toLowerCase().trim();
+        $scope.autocompleteResults = query ? $scope.guides.filter(function (guide) {
+          return (guide.title + ' ' + guide.meta).toLowerCase().indexOf(query) !== -1;
+        }).slice(0, 6) : [];
+        refreshIcons();
         if (searchTimer) $timeout.cancel(searchTimer);
         searchTimer = $timeout($scope.searchGuides, 300);
       };
@@ -115,6 +139,7 @@
       $http.get('data.json').then(function (response) {
         $scope.guides = response.data.guides || [];
         $scope.quickLinks = response.data.quickLinks || [];
+        refreshIcons();
         if (!selectedGuide) {
           $scope.view = 'home';
           return;

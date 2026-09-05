@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Acuere - Making Sharper</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <style>
         :root {
             --ink: #26354a;
@@ -41,6 +42,18 @@
             cursor: pointer;
         }
 
+        .icon {
+            width: 15px;
+            height: 15px;
+            vertical-align: -3px;
+            stroke-width: 2;
+        }
+
+        .icon-large {
+            width: 17px;
+            height: 17px;
+        }
+
         .app {
             min-height: 100vh;
             display: grid;
@@ -71,6 +84,26 @@
 
         .crumbs strong {
             color: #68748a;
+        }
+
+        .brand-mark {
+            display: inline-grid;
+            width: 28px;
+            height: 28px;
+            margin-right: 6px;
+            place-items: center;
+            border-radius: 8px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--blue), var(--mint));
+            vertical-align: middle;
+            box-shadow: 0 3px 8px rgba(46, 131, 187, .24);
+        }
+
+        .brand-mark .icon {
+            width: 17px;
+            height: 17px;
+            margin: 0;
+            stroke-width: 2.4;
         }
 
         .home-button {
@@ -107,6 +140,63 @@
             max-width: 720px;
             margin: 0 auto;
             padding: 5px 16px;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .search-container .header-search {
+            max-width: none;
+            margin: 0;
+        }
+
+        .autocomplete {
+            position: absolute;
+            top: calc(100% + 7px);
+            right: 0;
+            left: 0;
+            z-index: 30;
+            display: grid;
+            gap: 4px;
+            max-height: 320px;
+            padding: 7px;
+            overflow-y: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(43, 63, 94, .16);
+        }
+
+        .autocomplete-item {
+            display: block;
+            width: 100%;
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 5px;
+            color: var(--ink);
+            background: transparent;
+            text-align: left;
+        }
+
+        .autocomplete-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .autocomplete-row .autocomplete-item {
+            flex: 1;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item:focus {
+            outline: 0;
+            color: var(--blue);
+            background: #f1f8fa;
         }
 
         .workspace {
@@ -254,6 +344,13 @@
             color: var(--blue);
             font-size: 11px;
             white-space: nowrap;
+        }
+
+        mark {
+            padding: 0 2px;
+            border-radius: 3px;
+            color: #70415f;
+            background: #ffe49a;
         }
 
         .home-links {
@@ -441,19 +538,28 @@
 <body ng-app="acuereApp" ng-controller="ReaderController" ng-cloak>
     <div class="app">
         <header class="topbar">
-            <div class="crumbs"><a class="home-button" href="/">⌂ Home</a> &nbsp;/&nbsp; ◉ Acuere - Making Sharper</div>
-                <label class="search header-search">✦ <input type="search" ng-model="searchQuery"
-                    ng-change="queueSearch()" placeholder="e.g. Explore .NET Clean Architecture Complete Guide"
-                    aria-label="Search guides"></label>
+            <div class="crumbs"><a class="home-button" href="/"><i data-lucide="house" class="icon"></i> Home</a> &nbsp;/&nbsp; <span class="brand-mark" aria-label="Acuere logo"><i data-lucide="sparkles" class="icon"></i></span><strong>Acuere - Making Sharper</strong></div>
+                <div class="search-container">
+                    <label class="search header-search"><i data-lucide="search" class="icon-large"></i> <input type="search" ng-model="searchQuery"
+                        ng-change="queueSearch()" placeholder="e.g. Explore .NET Clean Architecture Complete Guide"
+                        aria-label="Search guides" autocomplete="off"></label>
+                    <div class="autocomplete" ng-if="autocompleteResults.length">
+                        <div class="autocomplete-row" ng-repeat="guide in autocompleteResults">
+                            <button class="autocomplete-item" type="button" ng-click="loadGuide(guide.file)"><i data-lucide="book-open" class="icon"></i> <span ng-bind-html="highlightMatch(guide.title)"></span></button>
+                            <a class="open-link" ng-href="{{ guideUrl(guide.file) }}" target="_blank"
+                                rel="noreferrer" aria-label="Open guide in a new tab" title="Open in new tab"><i data-lucide="external-link" class="icon"></i></a>
+                        </div>
+                    </div>
+                </div>
             <div class="top-actions"><button type="button">↗ Insights</button><button class="active" type="button">⚙
                     Acuere - Making Sharper</button></div>
         </header>
         <div class="workspace">
             <aside>
-                <div class="side-title">▣ Available Topics</div>
-                <div class="side-list"><button class="topic" ng-repeat="topic in guides"
+                <div class="side-title"><i data-lucide="book-open" class="icon"></i> Available Topics</div>
+                <div class="side-list"><button class="topic" ng-repeat="topic in guides | limitTo:10"
                         ng-class="{selected: topic.file === selectedGuide}" ng-click="openGuide(topic.file)"><span
-                            class="topic-name">▣ {{ topic.title }}</span><span class="topic-meta">◉ {{ topic.meta
+                            class="topic-name"><i data-lucide="book-open" class="icon"></i> {{ topic.title }}</span><span class="topic-meta"><i data-lucide="tag" class="icon"></i> {{ topic.meta
                             }}</span></button></div>
             </aside>
             <main class="main">
@@ -461,9 +567,9 @@
                     <div class="home-links">
                         <span class="empty" ng-if="searching">Searching your guides...</span>
                         <div class="result-row" ng-repeat="guide in searchResults">
-                            <button class="home-link" ng-click="loadGuide(guide.file)">▣ {{ guide.title }}</button>
+                            <button class="home-link" ng-click="loadGuide(guide.file)"><i data-lucide="book-open" class="icon"></i> <span ng-bind-html="highlightMatch(guide.title)"></span></button>
                             <a class="open-link" ng-href="{{ guideUrl(guide.file) }}" target="_blank"
-                                rel="noreferrer" aria-label="Open guide in a new tab" title="Open in new tab">↗</a>
+                                rel="noreferrer" aria-label="Open guide in a new tab" title="Open in new tab"><i data-lucide="external-link" class="icon"></i></a>
                         </div>
                         <span class="empty" ng-if="!searching && !searchResults.length">No matching guides found.</span>
                     </div>
@@ -473,8 +579,8 @@
                         <div class="welcome">◉ Welcome to Acuere - Making Sharper. Explore architectural topics below.
                         </div>
                         <h1>Hi, how can I assist?</h1>
-                        <div class="home-links" ng-if="!searchQuery"><button class="home-link" ng-repeat="guide in guides"
-                                ng-click="openGuide(guide.file)">▣ {{ guide.title }} ↗</button></div>
+                        <div class="home-links" ng-if="!searchQuery"><button class="home-link" ng-repeat="guide in guides | limitTo:10"
+                            ng-click="openGuide(guide.file)"><i data-lucide="book-open" class="icon"></i> {{ guide.title }} <i data-lucide="arrow-up-right" class="icon"></i></button></div>
                     </div>
                 </section>
                 <div class="empty" ng-if="view === 'loading'">Loading guide...</div>
@@ -486,16 +592,17 @@
                 </div>
             </main>
             <aside>
-                <div class="side-title">↗ Quick Links</div>
+                <div class="side-title"><i data-lucide="link" class="icon"></i> Quick Links</div>
                 <div class="side-list"><a class="topic" ng-repeat="link in quickLinks | filter:{external:true}"
-                        ng-href="{{ link.url }}" target="_blank" rel="noreferrer"><span class="topic-name">↗ {{
+                        ng-href="{{ link.url }}" target="_blank" rel="noreferrer"><span class="topic-name"><i data-lucide="external-link" class="icon"></i> {{
                             link.title }}</span></a><button class="topic"
                         ng-repeat="link in quickLinks | filter:{external:false}" ng-click="openGuide(link.url)"><span
-                            class="topic-name">▣ {{ link.title }}</span></button></div>
+                            class="topic-name"><i data-lucide="book-open" class="icon"></i> {{ link.title }}</span></button></div>
             </aside>
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="app.js"></script>
 </body>
 
