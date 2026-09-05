@@ -1,24 +1,16 @@
-AI-Assisted Software Development Skills
-This is where tools such as Claude Code become highly valuable.
+Developer Productivity Skills
+Git
+GitHub workflows
+Branching strategies
+Pull requests
+Code review
+IDE mastery
+Debugging
+CLI skills
+Shell scripting
+Automation
 
-AI Development Workflow
-AI-assisted planning
-AI-assisted architecture
-AI-assisted coding
-AI-assisted debugging
-AI-assisted testing
-AI-assisted code review
-AI-assisted documentation
-AI-assisted refactoring
-Agentic Development
-Repository understanding
-Codebase context management
-Task decomposition
-Agent workflows
-Parallel agents
-Automated verification
-
-Teach me [AI-Assisted Software Development Skills] as a complete, practical, and architect-level guide.
+Teach me [Developer Productivity Skills] as a complete, practical, and architect-level guide.
 
 Return Markdown syntax only. Do not include a preface, apology, or explanation
 outside the guide. Use clear headings, tables when useful, bullet lists, code

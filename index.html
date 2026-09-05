@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acuere - Making Sharper</title>
+  <style>
+    :root { --ink: #26354a; --muted: #718096; --line: #e7ebf1; --panel: #fff; --blue: #2e83bb; --pink: #d952a0; --mint: #4fc8b1; --bg: #f5f7fa; }
+    * { box-sizing: border-box; }
+    [ng-cloak] { display: none !important; }
+    body { margin: 0; color: var(--ink); background: var(--bg); font: 14px/1.55 "Trebuchet MS", Verdana, sans-serif; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-rows: 42px 1fr; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; background: #fff; border-bottom: 1px solid var(--line); }
+    .crumbs { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .crumbs strong { color: #68748a; }
+    .top-actions { display: flex; gap: 6px; }
+    .top-actions button { border: 1px solid #dfe5ed; border-radius: 4px; padding: 4px 9px; color: #68748a; background: #fff; font-size: 11px; }
+    .top-actions button.active { color: #347fd0; background: #edf4ff; border-color: #c9dcff; }
+    .workspace { display: grid; grid-template-columns: 205px minmax(0, 1fr) 205px; gap: 14px; padding: 10px 14px; min-height: 0; }
+    aside { min-width: 0; }
+    .side-title { padding: 5px 6px 10px; color: var(--pink); font-weight: 700; font-size: 12px; }
+    .side-list { display: grid; gap: 8px; }
+    .topic { display: block; width: 100%; text-align: left; padding: 9px 10px; background: #fff; border: 1px solid #d9e7ec; border-radius: 8px; color: var(--blue); box-shadow: 0 1px 4px rgba(32, 52, 78, .04); }
+    .topic:hover, .topic.selected { border-color: #dca9cf; box-shadow: 0 3px 12px rgba(48, 90, 130, .11); }
+    .topic-name { display: block; font-weight: 700; line-height: 1.2; }
+    .topic-meta { display: block; margin-top: 5px; color: #8793a2; font-size: 10px; line-height: 1.3; }
+    .main { min-width: 0; background: #fff; border: 1px solid #e5e8ef; border-radius: 7px; box-shadow: 0 2px 12px rgba(43, 63, 94, .06); overflow: hidden; }
+    .home { min-height: calc(100vh - 62px); display: grid; place-items: center; padding: 48px 20px; text-align: center; }
+    .home-inner { width: min(720px, 100%); }
+    .welcome { color: #7b8794; font-size: 12px; }
+    h1 { margin: 10px 0 14px; color: #4b49a2; font-size: clamp(24px, 3vw, 32px); font-weight: 400; }
+    .search { display: flex; align-items: center; gap: 10px; padding: 4px 12px; border: 1px solid #dce3f1; border-top: 3px solid var(--mint); border-radius: 30px; box-shadow: 0 4px 20px rgba(83, 126, 214, .2); }
+    .search input { width: 100%; border: 0; outline: 0; color: var(--ink); padding: 8px 0; background: transparent; }
+    .search input::placeholder { color: #9aa5b7; }
+    .home-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
+    .home-link { border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px 10px; color: #6c7890; background: #fff; font-size: 11px; }
+    .home-link:hover { border-color: #9fdace; color: var(--blue); }
+    .reader { max-width: 920px; margin: auto; padding: 30px clamp(20px, 5vw, 62px) 60px; }
+    .reader h1, .reader h2, .reader h3 { color: #354d71; text-align: left; font-weight: 700; }
+    .reader h1 { font-size: 30px; border-bottom: 2px solid #d9f1eb; padding-bottom: 12px; }
+    .reader h2 { margin-top: 34px; font-size: 22px; }
+    .reader h3 { margin-top: 25px; font-size: 17px; }
+    .reader a { color: #267eb7; }
+    .reader code { padding: 2px 5px; border-radius: 4px; background: #f0f3f7; color: #a13c78; }
+    .reader pre { overflow: auto; padding: 14px; border-radius: 7px; background: #202b3b; color: #e7eef8; }
+    .reader pre code { padding: 0; color: inherit; background: transparent; }
+    .reader blockquote { margin: 18px 0; padding: 8px 16px; border-left: 4px solid var(--mint); color: #68768a; background: #f5fbfa; }
+    .reader table { width: 100%; border-collapse: collapse; display: block; overflow-x: auto; }
+    .reader th, .reader td { min-width: 120px; padding: 8px; border: 1px solid var(--line); text-align: left; }
+    .reader th { background: #f3f7fb; }
+    .reader img { max-width: 100%; }
+    .empty { padding: 40px; color: var(--muted); text-align: center; }
+    @media (max-width: 900px) { .workspace { grid-template-columns: 180px minmax(0, 1fr); } .workspace > aside:last-child { display: none; } }
+    @media (max-width: 620px) { .workspace { display: block; padding: 8px; } .workspace > aside { display: none; } .main { min-height: calc(100vh - 58px); } .topbar { padding: 0 10px; } .top-actions { display: none; } .reader { padding: 22px 16px 40px; } }
+  </style>
+</head>
+<body ng-app="acuereApp" ng-controller="ReaderController" ng-cloak>
+  <div class="app">
+    <header class="topbar">
+      <div class="crumbs">⌂ <strong>Home</strong> &nbsp;/&nbsp; ◉ Acuere - Making Sharper</div>
+      <div class="top-actions"><button type="button">↗ Insights</button><button class="active" type="button">⚙ Acuere - Making Sharper</button></div>
+    </header>
+    <div class="workspace">
+      <aside><div class="side-title">▣ Available Topics</div><div class="side-list"><button class="topic" ng-repeat="topic in guides" ng-class="{selected: topic.file === selectedGuide}" ng-click="openGuide(topic.file)"><span class="topic-name">▣ {{ topic.title }}</span><span class="topic-meta">◉ {{ topic.meta }}</span></button></div></aside>
+      <main class="main">
+        <section class="home" ng-if="view === 'home'"><div class="home-inner"><div class="welcome">◉ Welcome to Acuere - Making Sharper. Explore architectural topics below.</div><h1>Hi, how can I assist?</h1><label class="search">✦ <input type="search" ng-model="searchQuery" ng-change="searchGuides()" placeholder="e.g. Explore .NET Clean Architecture Complete Guide" aria-label="Search guides"></label><div class="home-links"><button class="home-link" ng-repeat="guide in guides" ng-click="openGuide(guide.file)">▣ {{ guide.title }} ↗</button></div></div></section>
+        <section class="reader search-results" ng-if="view === 'search'"><h1>Search results</h1><p ng-if="searching">Searching your guides...</p><p ng-if="!searching">Found {{ searchResults.length }} guide<span ng-if="searchResults.length !== 1">s</span> for <strong>{{ searchQuery }}</strong>.</p><div class="side-list" ng-if="!searching"><button class="topic" ng-repeat="guide in searchResults" ng-click="openGuide(guide.file)"><span class="topic-name">▣ {{ guide.title }}</span><span class="topic-meta">◉ {{ guide.meta }}</span></button><div class="empty" ng-if="!searchResults.length">No matching guides found.</div></div></section>
+        <div class="empty" ng-if="view === 'loading'">Loading guide...</div>
+        <article class="reader" ng-if="view === 'guide'" ng-bind-html="guideHtml"></article>
+        <div class="empty" ng-if="view === 'error'"><h2>Open this site through a local server</h2><p>Browsers block loading Markdown files when <code>index.html</code> is opened directly. Run <code>npx serve .</code> in this folder, then open the local URL.</p></div>
+      </main>
+      <aside><div class="side-title">↗ Quick Links</div><div class="side-list"><a class="topic" ng-repeat="link in quickLinks | filter:{external:true}" ng-href="{{ link.url }}" target="_blank" rel="noreferrer"><span class="topic-name">↗ {{ link.title }}</span></a><button class="topic" ng-repeat="link in quickLinks | filter:{external:false}" ng-click="openGuide(link.url)"><span class="topic-name">▣ {{ link.title }}</span></button></div></aside>
+    </div>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
