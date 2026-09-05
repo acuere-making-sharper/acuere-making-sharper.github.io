@@ -2,10 +2,8 @@
   'use strict';
 
   angular.module('acuereApp', [])
-    .controller('ReaderController', ['$http', '$interval', '$q', '$sce', '$scope', '$timeout', function ($http, $interval, $q, $sce, $scope, $timeout) {
+    .controller('ReaderController', ['$http', '$interval', '$sce', '$scope', '$timeout', function ($http, $interval, $sce, $scope, $timeout) {
       var contentCache = {};
-      var searchIndex = [];
-      var indexingPromise;
       var searchTimer;
       var searchRequestId = 0;
       var placeholderTimer;
@@ -30,6 +28,21 @@
         });
       }
 
+      function isSafeGuideFile(file) {
+        return typeof file === 'string' && /^[a-z0-9][a-z0-9-]*\.md$/i.test(file);
+      }
+
+      function safeLinkUrl(value) {
+        try {
+          var url = new URL(value, window.location.href);
+          if (url.protocol === 'https:' || url.protocol === 'http:') return url.href;
+          if (url.origin === window.location.origin && url.pathname.endsWith('.md')) return url.href;
+        } catch (error) {
+          return '';
+        }
+        return '';
+      }
+
       function markdownToHtml(markdown) {
         var codeBlocks = [];
         var text = markdown.replace(/```(\w*)\n([\s\S]*?)```/g, function (_, language, code) {
@@ -40,7 +53,10 @@
           .replace(/^### (.*)$/gm, '<h3>$1</h3>').replace(/^## (.*)$/gm, '<h2>$1</h2>').replace(/^# (.*)$/gm, '<h1>$1</h1>')
           .replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>').replace(/^---$/gm, '<hr>')
           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`([^`]+)`/g, '<code>$1</code>')
-          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
+            var safeHref = safeLinkUrl(href);
+            return safeHref ? '<a href="' + safeHref + '" target="_blank" rel="noopener noreferrer">' + label + '</a>' : label;
+          });
         text = text.replace(/(^|\n)([-*] .+(?:\n[-*] .+)*)/g, function (_, before, list) {
           return before + '<ul>' + list.trim().split('\n').map(function (item) { return '<li>' + item.slice(2) + '</li>'; }).join('') + '</ul>';
         });
@@ -51,6 +67,7 @@
       }
 
       function fetchGuide(file) {
+        if (!isSafeGuideFile(file)) return Promise.reject(new Error('Invalid guide file'));
         if (!contentCache[file]) {
           contentCache[file] = $http.get(file).then(function (response) { return response.data; });
         }
@@ -63,19 +80,10 @@
         }, 0);
       }
 
-      function buildSearchIndex() {
-        if (indexingPromise) return indexingPromise;
-        indexingPromise = $q.all($scope.guides.map(function (guide) {
-          return fetchGuide(guide.file).then(function (content) {
-            searchIndex.push({ guide: guide, text: (guide.title + ' ' + guide.meta + ' ' + content).toLowerCase() });
-          });
-        }));
-        return indexingPromise;
-      }
-
       $scope.guideUrl = function (file) {
         var guide = $scope.guides.find(function (item) { return item.file === file; });
-        return guide && guide.slug ? new URL(guide.slug, window.location.origin + '/').href : new URL('index.html?guide=' + encodeURIComponent(file), window.location.href).href;
+        if (!guide || !isSafeGuideFile(guide.file)) return '#';
+        return guide.slug ? new URL(guide.slug, window.location.origin + '/').href : new URL('index.html?guide=' + encodeURIComponent(guide.file), window.location.href).href;
       };
 
       $scope.highlightMatch = function (value) {
@@ -105,7 +113,8 @@
       };
 
       $scope.openGuide = function (file) {
-        window.open($scope.guideUrl(file), '_blank', 'noopener,noreferrer');
+        var url = $scope.guideUrl(file);
+        if (url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
       };
 
       $scope.searchGuides = function () {
@@ -117,19 +126,11 @@
           $scope.searchResults = [];
           return;
         }
-        if (searchIndex.length === $scope.guides.length) {
-          $scope.searchResults = searchIndex.filter(function (item) { return item.text.indexOf(query) !== -1; }).map(function (item) { return item.guide; });
-          $scope.searching = false;
-          refreshIcons();
-          return;
-        }
-        $scope.searching = true;
-        buildSearchIndex().then(function () {
-          if (requestId !== searchRequestId) return;
-          $scope.searchResults = searchIndex.filter(function (item) { return item.text.indexOf(query) !== -1; }).map(function (item) { return item.guide; });
-          $scope.searching = false;
-          refreshIcons();
+        $scope.searching = false;
+        $scope.searchResults = $scope.guides.filter(function (guide) {
+          return (guide.title + ' ' + guide.meta).toLowerCase().indexOf(query) !== -1;
         });
+        if (requestId === searchRequestId) refreshIcons();
       };
 
       $scope.queueSearch = function () {
@@ -165,7 +166,7 @@
       });
 
       $http.get('data.json').then(function (response) {
-        $scope.guides = response.data.guides || [];
+        $scope.guides = (response.data.guides || []).filter(function (guide) { return isSafeGuideFile(guide.file); });
         $scope.quickLinks = response.data.quickLinks || [];
         placeholderExamples = $scope.guides.map(function (guide) { return 'e.g. Explore ' + guide.title; });
         placeholderIndex = 0;
@@ -175,6 +176,10 @@
         refreshIcons();
         if (!selectedGuide) {
           $scope.view = 'home';
+          return;
+        }
+        if (!$scope.guides.some(function (guide) { return guide.file === selectedGuide; })) {
+          $scope.view = 'error';
           return;
         }
         return fetchGuide(selectedGuide).then(function (markdown) {
