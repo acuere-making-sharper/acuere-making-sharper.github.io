@@ -4,7 +4,10 @@
   angular.module('acuereApp', [])
     .controller('ReaderController', ['$http', '$q', '$sce', '$scope', '$timeout', function ($http, $q, $sce, $scope, $timeout) {
       var contentCache = {};
+      var searchIndex = [];
+      var indexingPromise;
       var searchTimer;
+      var searchRequestId = 0;
       var selectedGuide = new URLSearchParams(window.location.search).get('guide');
 
       $scope.guides = [];
@@ -47,6 +50,16 @@
         return contentCache[file];
       }
 
+      function buildSearchIndex() {
+        if (indexingPromise) return indexingPromise;
+        indexingPromise = $q.all($scope.guides.map(function (guide) {
+          return fetchGuide(guide.file).then(function (content) {
+            searchIndex.push({ guide: guide, text: (guide.title + ' ' + guide.meta + ' ' + content).toLowerCase() });
+          });
+        }));
+        return indexingPromise;
+      }
+
       $scope.guideUrl = function (file) {
         var guide = $scope.guides.find(function (item) { return item.file === file; });
         return guide && guide.slug ? new URL(guide.slug, window.location.origin + '/').href : new URL('index.html?guide=' + encodeURIComponent(file), window.location.href).href;
@@ -74,18 +87,22 @@
 
       $scope.searchGuides = function () {
         var query = ($scope.searchQuery || '').toLowerCase().trim();
+        var requestId = ++searchRequestId;
         if (!query) {
           $scope.view = $scope.selectedGuide ? 'guide' : 'home';
+          $scope.searching = false;
+          $scope.searchResults = [];
+          return;
+        }
+        if (searchIndex.length === $scope.guides.length) {
+          $scope.searchResults = searchIndex.filter(function (item) { return item.text.indexOf(query) !== -1; }).map(function (item) { return item.guide; });
+          $scope.searching = false;
           return;
         }
         $scope.searching = true;
-        $scope.searchResults = [];
-        $q.all($scope.guides.map(function (guide) {
-          return fetchGuide(guide.file).then(function (content) {
-            return (guide.title + ' ' + guide.meta + ' ' + content).toLowerCase().indexOf(query) !== -1 ? guide : null;
-          });
-        })).then(function (results) {
-          $scope.searchResults = results.filter(Boolean);
+        buildSearchIndex().then(function () {
+          if (requestId !== searchRequestId) return;
+          $scope.searchResults = searchIndex.filter(function (item) { return item.text.indexOf(query) !== -1; }).map(function (item) { return item.guide; });
           $scope.searching = false;
         });
       };
