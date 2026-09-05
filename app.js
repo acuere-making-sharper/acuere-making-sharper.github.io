@@ -2,38 +2,17 @@
   'use strict';
 
   angular.module('acuereApp', [])
-    .controller('ReaderController', ['$http', '$q', '$sce', '$scope', function ($http, $q, $sce, $scope) {
+    .controller('ReaderController', ['$http', '$q', '$sce', '$scope', '$timeout', function ($http, $q, $sce, $scope, $timeout) {
       var contentCache = {};
+      var searchTimer;
       var selectedGuide = new URLSearchParams(window.location.search).get('guide');
 
-      $scope.guides = [
-        { title: '.NET Clean Architecture Complete Guide', file: 'dotnet-clean-architecture-complete-guide.md', meta: 'dotnet, clean-architecture, ddd, csharp' },
-        { title: 'Claude Code Complete Guide', file: 'claude-code-complete-guide.md', meta: 'claude-code, ai, cli, agentic-coding' },
-        { title: 'Top Claude Code Plugins for End-to-End Product Development', file: 'top-claude-code-plugins-end-to-end-product-development-complete-guide.md', meta: 'claude-code, plugins, productivity' },
-        { title: 'AI Fundamentals Complete Guide', file: 'ai-fundamentals-complete-guide.md', meta: 'ai, artificial-intelligence, machine-learning' },
-        { title: 'RAG Retrieval-Augmented Generation Complete Guide', file: 'retrieval-augmented-generation-rag-complete-guide.md', meta: 'rag, vector-database, embeddings' },
-        { title: 'Claude Code Plugins Complete Guide', file: 'claude-code-plugins-complete-guide.md', meta: 'claude-code, plugins, extensions' },
-        { title: 'Claude Complete Guide', file: 'claude-complete-guide.md', meta: 'claude, ai, anthropic' },
-        { title: 'Microsoft Agent Framework Complete Guide', file: 'maf-microsoft-agent-framework-complete-guide.md', meta: 'maf, agents, microsoft' },
-        { title: 'LLM Large Language Model Complete Guide', file: 'llm-large-language-model-complete-guide.md', meta: 'llm, language-models, ai' },
-        { title: '.NET Performance Optimization Complete Guide', file: 'dotnet-performance-optimization-complete-guide.md', meta: 'dotnet, performance, optimization' },
-        { title: 'Git Complete Guide', file: 'git-complete-guide.md', meta: 'git, version-control, workflows' },
-        { title: 'React Complete Guide', file: 'react-complete-guide.md', meta: 'react, javascript, frontend' }
-      ];
-
-      $scope.quickLinks = [
-        { title: 'GitHub Profile', url: 'https://github.com/utpal-maiti', external: true },
-        { title: 'ChatGPT AI Assistant', url: 'https://chatgpt.com/', external: true },
-        { title: 'Developer Roadmaps', url: 'https://roadmap.sh/', external: true },
-        { title: 'LinkedIn', url: 'https://www.linkedin.com/in/utpal-maiti/', external: true },
-        { title: 'Skills Directory', url: 'https://skills.sh/', external: true },
-        { title: 'Acuere Group', url: 'https://acuere.com/', external: true },
-        { title: 'Product Development Skill Map', url: 'complete-end-to-end-product-development-skill-map-complete-guide.md', external: false }
-      ];
+      $scope.guides = [];
+      $scope.quickLinks = [];
       $scope.selectedGuide = selectedGuide;
       $scope.searchQuery = '';
       $scope.searchResults = [];
-      $scope.view = selectedGuide ? 'loading' : 'home';
+      $scope.view = 'loading';
 
       function escapeHtml(value) {
         return value.replace(/[&<>"']/g, function (character) {
@@ -68,17 +47,37 @@
         return contentCache[file];
       }
 
+      $scope.guideUrl = function (file) {
+        var guide = $scope.guides.find(function (item) { return item.file === file; });
+        return guide && guide.slug ? new URL(guide.slug, window.location.origin + '/').href : new URL('index.html?guide=' + encodeURIComponent(file), window.location.href).href;
+      };
+
+      $scope.loadGuide = function (file) {
+        $scope.selectedGuide = file;
+        $scope.view = 'loading';
+        fetchGuide(file).then(function (markdown) {
+          $scope.guideHtml = $sce.trustAsHtml(markdownToHtml(markdown));
+          $scope.view = 'guide';
+          document.title = 'Guide - Acuere';
+          $timeout(function () {
+            var reader = document.getElementById('guide-reader');
+            if (reader) reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }).catch(function () {
+          $scope.view = 'error';
+        });
+      };
+
       $scope.openGuide = function (file) {
-        window.location.href = 'index.html?guide=' + encodeURIComponent(file);
+        window.open($scope.guideUrl(file), '_blank', 'noopener,noreferrer');
       };
 
       $scope.searchGuides = function () {
         var query = ($scope.searchQuery || '').toLowerCase().trim();
         if (!query) {
-          $scope.view = 'home';
+          $scope.view = $scope.selectedGuide ? 'guide' : 'home';
           return;
         }
-        $scope.view = 'search';
         $scope.searching = true;
         $scope.searchResults = [];
         $q.all($scope.guides.map(function (guide) {
@@ -91,18 +90,25 @@
         });
       };
 
-      $scope.$watch('searchQuery', function (value, previousValue) {
-        if (value !== previousValue) $scope.searchGuides();
-      });
+      $scope.queueSearch = function () {
+        if (searchTimer) $timeout.cancel(searchTimer);
+        searchTimer = $timeout($scope.searchGuides, 300);
+      };
 
-      if (selectedGuide) {
-        fetchGuide(selectedGuide).then(function (markdown) {
+      $http.get('data.json').then(function (response) {
+        $scope.guides = response.data.guides || [];
+        $scope.quickLinks = response.data.quickLinks || [];
+        if (!selectedGuide) {
+          $scope.view = 'home';
+          return;
+        }
+        return fetchGuide(selectedGuide).then(function (markdown) {
           $scope.guideHtml = $sce.trustAsHtml(markdownToHtml(markdown));
           $scope.view = 'guide';
           document.title = 'Guide - Acuere';
-        }).catch(function () {
-          $scope.view = 'error';
         });
-      }
+      }).catch(function () {
+        $scope.view = 'error';
+      });
     }]);
 }());

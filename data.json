@@ -1,0 +1,24 @@
+{
+  "guides": [
+    { "title": "AI-Assisted Software Development Skills Complete Guide", "file": "ai-assisted-software-development-skills-complete-guide.md", "slug": "ai-assisted-software-development-skills-complete-guide", "meta": "ai, software-development, skills" },
+    { "title": ".NET Clean Architecture Complete Guide", "file": "dotnet-clean-architecture-complete-guide.md", "slug": "dotnet-clean-architecture-complete-guide", "meta": "dotnet, clean-architecture, ddd, csharp" },
+    { "title": "Claude Code Complete Guide", "file": "claude-code-complete-guide.md", "slug": "claude-code-complete-guide", "meta": "claude-code, ai, cli, agentic-coding" },
+    { "title": "Top Claude Code Plugins for End-to-End Product Development", "file": "top-claude-code-plugins-end-to-end-product-development-complete-guide.md", "slug": "top-claude-code-plugins-end-to-end-product-development-complete-guide", "meta": "claude-code, plugins, productivity" },
+    { "title": "AI Fundamentals Complete Guide", "file": "ai-fundamentals-complete-guide.md", "slug": "ai-fundamentals-complete-guide", "meta": "ai, artificial-intelligence, machine-learning" },
+    { "title": "RAG Retrieval-Augmented Generation Complete Guide", "file": "retrieval-augmented-generation-rag-complete-guide.md", "slug": "retrieval-augmented-generation-rag-complete-guide", "meta": "rag, vector-database, embeddings" },
+    { "title": "Claude Code Plugins Complete Guide", "file": "claude-code-plugins-complete-guide.md", "slug": "claude-code-plugins-complete-guide", "meta": "claude-code, plugins, extensions" },
+    { "title": "Claude Complete Guide", "file": "claude-complete-guide.md", "slug": "claude-complete-guide", "meta": "claude, ai, anthropic" },
+    { "title": "Microsoft Agent Framework Complete Guide", "file": "maf-microsoft-agent-framework-complete-guide.md", "slug": "maf-microsoft-agent-framework-complete-guide", "meta": "maf, agents, microsoft" },
+    { "title": "LLM Large Language Model Complete Guide", "file": "llm-large-language-model-complete-guide.md", "slug": "llm-large-language-model-complete-guide", "meta": "llm, language-models, ai" },
+    { "title": ".NET Performance Optimization Complete Guide", "file": "dotnet-performance-optimization-complete-guide.md", "slug": "dotnet-performance-optimization-complete-guide", "meta": "dotnet, performance, optimization" },
+    { "title": "Git Complete Guide", "file": "git-complete-guide.md", "slug": "git-complete-guide", "meta": "git, version-control, workflows" },
+    { "title": "React Complete Guide", "file": "react-complete-guide.md", "slug": "react-complete-guide", "meta": "react, javascript, frontend" }
+  ],
+  "quickLinks": [
+    { "title": "ChatGPT AI Assistant", "url": "https://chatgpt.com/", "external": true },
+    { "title": "Developer Roadmaps", "url": "https://roadmap.sh/", "external": true },
+    { "title": "LinkedIn", "url": "https://www.linkedin.com/in/utpal-maiti/", "external": true },
+    { "title": "Skills Directory", "url": "https://skills.sh/", "external": true },
+    { "title": "Product Development Skill Map", "url": "complete-end-to-end-product-development-skill-map-complete-guide.md", "external": false }
+  ]
+}

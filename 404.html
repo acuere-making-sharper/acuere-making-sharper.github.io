@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acuere - Making Sharper</title>
+  <style>html, body, iframe { width: 100%; height: 100%; margin: 0; border: 0; } body { overflow: hidden; }</style>
+</head>
+<body>
+  <iframe id="reader" src="/index.html" title="Acuere - Making Sharper"></iframe>
+  <script>
+    (function () {
+      var slug = decodeURIComponent(window.location.pathname.replace(/^\/+|\/+$/g, ''));
+      if (!slug) return;
+      fetch('/data.json').then(function (response) { return response.json(); }).then(function (data) {
+        var guide = (data.guides || []).find(function (item) { return item.slug === slug; });
+        if (guide) document.getElementById('reader').src = '/index.html?guide=' + encodeURIComponent(guide.file);
+      });
+    }());
+  </script>
+</body>
+</html>
