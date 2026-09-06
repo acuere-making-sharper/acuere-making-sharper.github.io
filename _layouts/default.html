@@ -204,6 +204,10 @@
           theme: 'default'
         });
 
+        document.querySelectorAll('pre code.language-mermaid').forEach(function (code) {
+          code.parentElement.classList.add('mermaid');
+        });
+
         var nodes = document.querySelectorAll('.mermaid, pre.mermaid');
         if (nodes.length) {
           window.mermaid.run({ nodes: Array.prototype.slice.call(nodes) });
