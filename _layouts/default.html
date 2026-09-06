@@ -84,21 +84,57 @@
       }
 
       h2 {
-        margin-top: 2rem;
+        margin: 2rem 0 1rem 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e0e6ed;
         font-size: clamp(1.5rem, 2.2vw, 2rem);
+        font-weight: 600;
       }
 
       h3 {
-        margin-top: 1.6rem;
+        margin: 1.6rem 0 0.8rem 0;
         font-size: 1.2rem;
+        font-weight: 600;
       }
 
-      p,
-      li,
-      blockquote,
-      td,
-      th {
+      h4 {
+        margin: 1.2rem 0 0.6rem 0;
+        font-size: 1.05rem;
+        font-weight: 600;
+      }
+
+      h5, h6 {
+        margin: 1rem 0 0.5rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 1rem 0;
         color: var(--ink);
+      }
+
+      ul,
+      ol {
+        margin: 1rem 0;
+        padding-left: 2rem;
+      }
+
+      li {
+        margin: 0.5rem 0;
+        color: var(--ink);
+      }
+
+      li p {
+        margin: 0.5rem 0;
+      }
+
+      blockquote {
+        margin: 18px 0;
+        padding: 8px 16px;
+        border-left: 4px solid var(--mint);
+        color: #68768a;
+        background: #f5fbfa;
       }
 
       a {
@@ -110,12 +146,22 @@
         text-decoration: underline;
       }
 
+      strong {
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      em {
+        font-style: italic;
+      }
+
       code {
         padding: 2px 6px;
         border-radius: 4px;
         background: #f0f3f7;
         color: #a13c78;
         font-size: 0.95em;
+        font-family: "Courier New", monospace;
       }
 
       pre {
@@ -124,20 +170,21 @@
         border-radius: 7px;
         background: #202b3b;
         color: #e7eef8;
+        margin: 1rem 0;
       }
 
       pre code {
         padding: 0;
         color: inherit;
         background: transparent;
+        font-size: 0.9em;
       }
 
-      blockquote {
-        margin: 18px 0;
-        padding: 8px 16px;
-        border-left: 4px solid var(--mint);
-        color: #68768a;
-        background: #f5fbfa;
+      hr {
+        border: none;
+        border-top: 2px solid var(--line);
+        margin: 2rem 0;
+        height: 0;
       }
 
       th,
@@ -150,11 +197,19 @@
 
       th {
         background: #f3f7fb;
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      td {
+        color: var(--ink);
       }
 
       img {
         max-width: 100%;
         height: auto;
+        margin: 1rem 0;
+        border-radius: 6px;
       }
 
       .page-shell {
@@ -165,6 +220,14 @@
         border-radius: 12px;
         box-shadow: 0 2px 12px rgba(43, 63, 94, .06);
         padding: clamp(1.25rem, 3vw, 2.5rem);
+      }
+
+      .page-shell > *:first-child {
+        margin-top: 0;
+      }
+
+      .page-shell > *:last-child {
+        margin-bottom: 0;
       }
 
       @media (min-width: 768px) {
@@ -188,6 +251,15 @@
 
         h1 {
           font-size: 2rem;
+        }
+
+        h2 {
+          font-size: 1.4rem;
+        }
+
+        ul,
+        ol {
+          padding-left: 1.5rem;
         }
       }
     </style>
