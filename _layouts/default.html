@@ -65,14 +65,17 @@
         border-collapse: collapse;
       }
 
-      /* Hide unprocessed mermaid diagrams */
-      pre.mermaid,
+      /* Mermaid diagram styling */
       .mermaid {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
         overflow-x: auto;
       }
 
-      pre.mermaid code {
-        display: none;
+      /* Hide pre blocks that contain mermaid diagrams */
+      pre.language-mermaid {
+        display: none !important;
       }
 
       h1, h2, h3, h4, h5, h6 {
@@ -177,6 +180,7 @@
         background: #202b3b;
         color: #e7eef8;
         margin: 1rem 0;
+        line-height: 1.4;
       }
 
       pre code {
@@ -184,6 +188,7 @@
         color: inherit;
         background: transparent;
         font-size: 0.9em;
+        font-family: "Courier New", monospace;
       }
 
       hr {
@@ -267,11 +272,16 @@
         ol {
           padding-left: 1.5rem;
         }
+
+        pre {
+          font-size: 12px;
+          padding: 10px;
+        }
       }
     </style>
 
     <!-- Mermaid.js for diagrams -->
-    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         if (!window.mermaid) return;
@@ -279,16 +289,25 @@
         window.mermaid.initialize({
           startOnLoad: false,
           securityLevel: 'loose',
-          theme: 'default'
+          theme: 'default',
+          logLevel: 'fatal'
         });
 
-        document.querySelectorAll('pre code.language-mermaid').forEach(function (code) {
-          code.parentElement.classList.add('mermaid');
+        // Process code blocks with language-mermaid class
+        document.querySelectorAll('pre.language-mermaid').forEach(function (pre) {
+          const code = pre.querySelector('code');
+          if (code) {
+            const mermaidDiv = document.createElement('div');
+            mermaidDiv.className = 'mermaid';
+            mermaidDiv.textContent = code.textContent;
+            pre.parentNode.replaceChild(mermaidDiv, pre);
+          }
         });
 
-        var nodes = document.querySelectorAll('.mermaid, pre.mermaid');
-        if (nodes.length) {
-          window.mermaid.run({ nodes: Array.prototype.slice.call(nodes) });
+        // Also handle any existing .mermaid divs
+        const mermaidBlocks = document.querySelectorAll('.mermaid');
+        if (mermaidBlocks.length) {
+          window.mermaid.run({ nodes: Array.from(mermaidBlocks) });
         }
       });
     </script>
