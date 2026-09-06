@@ -73,8 +73,17 @@
         overflow-x: auto;
       }
 
-      /* Hide pre blocks that contain mermaid diagrams */
+      /* Hide pre blocks with language-mermaid during processing */
       pre.language-mermaid {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      pre.language-mermaid code {
         display: none !important;
       }
 
@@ -283,7 +292,7 @@
     <!-- Mermaid.js for diagrams -->
     <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
+      function processMermaidDiagrams() {
         if (!window.mermaid) return;
 
         window.mermaid.initialize({
@@ -293,23 +302,39 @@
           logLevel: 'fatal'
         });
 
-        // Process code blocks with language-mermaid class
-        document.querySelectorAll('pre.language-mermaid').forEach(function (pre) {
+        // Process all pre.language-mermaid blocks
+        let mermaidBlocks = document.querySelectorAll('pre.language-mermaid');
+        mermaidBlocks.forEach(function (pre) {
           const code = pre.querySelector('code');
-          if (code) {
+          if (code && code.textContent.trim()) {
+            // Create a new mermaid div with the diagram code
             const mermaidDiv = document.createElement('div');
             mermaidDiv.className = 'mermaid';
             mermaidDiv.textContent = code.textContent;
+            
+            // Replace the pre block with the mermaid div
             pre.parentNode.replaceChild(mermaidDiv, pre);
           }
         });
 
-        // Also handle any existing .mermaid divs
-        const mermaidBlocks = document.querySelectorAll('.mermaid');
-        if (mermaidBlocks.length) {
-          window.mermaid.run({ nodes: Array.from(mermaidBlocks) });
+        // Also process any divs that already have mermaid class
+        let existingMermaid = document.querySelectorAll('.mermaid:not(pre)');
+        if (existingMermaid.length > 0 || mermaidBlocks.length > 0) {
+          window.mermaid.run({ 
+            nodes: Array.from(existingMermaid)
+          });
         }
-      });
+      }
+
+      // Run after DOM is loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', processMermaidDiagrams);
+      } else {
+        processMermaidDiagrams();
+      }
+
+      // Also run after mermaid script loads
+      document.addEventListener('mermaid.ready', processMermaidDiagrams);
     </script>
 
     <!-- Markmap (optional, for heading-based mindmaps) -->
