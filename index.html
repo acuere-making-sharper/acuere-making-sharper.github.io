@@ -180,6 +180,43 @@
             margin: 0;
         }
 
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .search-row .header-search {
+            flex: 1;
+        }
+
+        .search-mode-toggle {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            place-items: center;
+            padding: 0;
+            border: 1px solid #dfe5ed;
+            border-radius: 50%;
+            color: #68748a;
+            background: #fff;
+        }
+
+        .search-mode-toggle:hover,
+        .search-mode-toggle:focus-visible {
+            outline: 0;
+            color: var(--blue);
+            border-color: #9fdace;
+            box-shadow: 0 3px 10px rgba(48, 90, 130, .12);
+        }
+
+        .search-mode-toggle.active {
+            color: #347fd0;
+            background: #edf4ff;
+            border-color: #c9dcff;
+        }
+
         .autocomplete {
             position: absolute;
             top: calc(100% + 7px);
@@ -609,10 +646,17 @@
         <header class="topbar">
             <div class="crumbs"><a class="home-button" href="/"><i data-lucide="house" class="icon"></i> Home</a> &nbsp;/&nbsp; <span class="brand-mark" aria-label="Acuere logo"><i data-lucide="sparkles" class="icon"></i></span><strong>Acuere - Making Sharper</strong></div>
                 <div class="search-container">
-                    <label class="search header-search"><i data-lucide="search" class="icon-large"></i> <input type="search" ng-model="searchQuery"
-                        ng-change="queueSearch()" ng-attr-placeholder="{{ searchPlaceholder }}"
-                        aria-label="Search guides" autocomplete="off"></label>
-                    <div class="autocomplete" ng-if="autocompleteResults.length">
+                    <div class="search-row">
+                        <label class="search header-search"><i data-lucide="search" class="icon-large"></i> <input type="search" ng-model="searchQuery"
+                            ng-change="queueSearch()" ng-attr-placeholder="{{ searchPlaceholder }}"
+                            aria-label="Search guides" autocomplete="off"></label>
+                        <button class="search-mode-toggle" type="button" ng-class="{active: searchMode === 'page'}"
+                            ng-click="toggleSearchMode()" ng-attr-aria-label="{{ searchMode === 'autocomplete' ? 'Switch to page search' : 'Switch to autocomplete' }}"
+                            ng-attr-title="{{ searchMode === 'autocomplete' ? 'Switch to page search' : 'Switch to autocomplete' }}">
+                            <i data-lucide="{{ searchMode === 'autocomplete' ? 'list-filter' : 'file-search' }}" class="icon"></i>
+                        </button>
+                    </div>
+                    <div class="autocomplete" ng-if="searchMode === 'autocomplete' && autocompleteResults.length">
                         <div class="autocomplete-row" ng-repeat="guide in autocompleteResults">
                             <button class="autocomplete-item" type="button" ng-click="loadGuide(guide.file)"><i data-lucide="book-open" class="icon"></i> <span ng-bind-html="highlightMatch(guide.title)"></span></button>
                             <a class="open-link" ng-href="{{ guideUrl(guide.file) }}" target="_blank"
@@ -632,7 +676,7 @@
                             }}</span></button></div>
             </aside>
             <main class="main">
-                <div class="search-results-inline" ng-if="searchQuery">
+                <div class="search-results-inline" ng-if="searchMode === 'page' && searchQuery">
                     <div class="home-links">
                         <span class="empty" ng-if="searching">Searching your guides...</span>
                         <div class="result-row" ng-repeat="guide in searchResults">

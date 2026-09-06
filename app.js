@@ -18,6 +18,7 @@
       $scope.selectedGuide = selectedGuide;
       $scope.searchQuery = '';
       $scope.searchPlaceholder = 'e.g. Explore a guide';
+      $scope.searchMode = 'autocomplete';
       $scope.autocompleteResults = [];
       $scope.searchResults = [];
       $scope.view = 'loading';
@@ -96,6 +97,7 @@
 
       $scope.loadGuide = function (file) {
         $scope.autocompleteResults = [];
+        $scope.searchResults = [];
         $scope.selectedGuide = file;
         $scope.view = 'loading';
         fetchGuide(file).then(function (markdown) {
@@ -135,12 +137,25 @@
 
       $scope.queueSearch = function () {
         var query = ($scope.searchQuery || '').toLowerCase().trim();
-        $scope.autocompleteResults = query ? $scope.guides.filter(function (guide) {
+        $scope.autocompleteResults = $scope.searchMode === 'autocomplete' && query ? $scope.guides.filter(function (guide) {
           return (guide.title + ' ' + guide.meta).toLowerCase().indexOf(query) !== -1;
         }).slice(0, 6) : [];
+        if ($scope.searchMode !== 'autocomplete') $scope.searchResults = [];
         refreshIcons();
         if (searchTimer) $timeout.cancel(searchTimer);
-        searchTimer = $timeout($scope.searchGuides, 300);
+        searchTimer = $scope.searchMode === 'page' ? $timeout($scope.searchGuides, 300) : null;
+      };
+
+      $scope.toggleSearchMode = function () {
+        $scope.searchMode = $scope.searchMode === 'autocomplete' ? 'page' : 'autocomplete';
+        if (searchTimer) $timeout.cancel(searchTimer);
+        $scope.autocompleteResults = [];
+        $scope.searchResults = [];
+        if ($scope.searchMode === 'page') {
+          $scope.searchGuides();
+        } else {
+          $scope.queueSearch();
+        }
       };
 
       placeholderTimer = $interval(function () {
