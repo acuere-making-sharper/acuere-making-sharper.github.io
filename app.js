@@ -13,7 +13,13 @@
       var deletingPlaceholder = false;
       var selectedGuide = new URLSearchParams(window.location.search).get('guide');
 
-      if (window.mermaid) window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict' });
+      if (window.mermaid) {
+        window.mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'loose',
+          theme: 'default'
+        });
+      }
 
       $scope.guides = [];
       $scope.quickLinks = [];
@@ -89,7 +95,9 @@
       function renderMermaid() {
         $timeout(function () {
           if (!window.mermaid) return;
-          window.mermaid.run({ querySelector: '#guide-reader .mermaid' });
+          var nodes = document.querySelectorAll('#guide-reader .mermaid');
+          if (!nodes.length) return;
+          window.mermaid.run({ nodes: nodes });
         }, 0);
       }
 

@@ -35,7 +35,7 @@
       main {
         width: min(100%, 1200px);
         margin: 0 auto;
-        padding: 2rem 1rem 4rem;
+        padding: 2rem min(2rem, 4vw) 4rem;
       }
 
       main > * {
@@ -167,6 +167,12 @@
         padding: clamp(1.25rem, 3vw, 2.5rem);
       }
 
+      @media (min-width: 768px) {
+        .page-shell {
+          min-width: 0;
+        }
+      }
+
       @media (max-width: 768px) {
         body {
           font-size: 15px;
@@ -190,11 +196,17 @@
     <script defer src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        if (window.mermaid) {
-          window.mermaid.initialize({
-            startOnLoad: true,
-            securityLevel: 'loose'
-          });
+        if (!window.mermaid) return;
+
+        window.mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'loose',
+          theme: 'default'
+        });
+
+        var nodes = document.querySelectorAll('.mermaid, pre.mermaid');
+        if (nodes.length) {
+          window.mermaid.run({ nodes: Array.prototype.slice.call(nodes) });
         }
       });
     </script>
