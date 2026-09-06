@@ -1,3 +1,8 @@
+---
+layout: default
+title: AI Fundamentals Demo
+---
+
 # AI Fundamentals: Complete Practical and Architect-Level Guide
 
 > **Scope:** Artificial Intelligence is a very broad field. This guide focuses on the foundation a software engineer and solution architect need to understand modern AI systems: classical AI, machine learning, deep learning, generative AI, large language models, embeddings, retrieval, agents, production architecture, evaluation, and responsible deployment.

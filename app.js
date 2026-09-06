@@ -13,6 +13,8 @@
       var deletingPlaceholder = false;
       var selectedGuide = new URLSearchParams(window.location.search).get('guide');
 
+      if (window.mermaid) window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict' });
+
       $scope.guides = [];
       $scope.quickLinks = [];
       $scope.selectedGuide = selectedGuide;
@@ -47,7 +49,10 @@
       function markdownToHtml(markdown) {
         var codeBlocks = [];
         var text = markdown.replace(/```(\w*)\n([\s\S]*?)```/g, function (_, language, code) {
-          codeBlocks.push('<pre><code class="language-' + language + '">' + escapeHtml(code.trim()) + '</code></pre>');
+          var escapedCode = escapeHtml(code.trim());
+          codeBlocks.push(language.toLowerCase() === 'mermaid'
+            ? '<div class="mermaid">' + escapedCode + '</div>'
+            : '<pre><code class="language-' + language + '">' + escapedCode + '</code></pre>');
           return '\n@@CODE_' + (codeBlocks.length - 1) + '@@\n';
         });
         text = escapeHtml(text)
@@ -62,7 +67,7 @@
           return before + '<ul>' + list.trim().split('\n').map(function (item) { return '<li>' + item.slice(2) + '</li>'; }).join('') + '</ul>';
         });
         text = text.split(/\n{2,}/).map(function (block) {
-          return /^(<h|<ul|<blockquote|<pre|<hr)/.test(block.trim()) ? block : '<p>' + block.replace(/\n/g, '<br>') + '</p>';
+          return /^(<h|<ul|<blockquote|<pre|<div|<hr)/.test(block.trim()) ? block : '<p>' + block.replace(/\n/g, '<br>') + '</p>';
         }).join('\n');
         return text.replace(/@@CODE_(\d+)@@/g, function (_, index) { return codeBlocks[index]; });
       }
@@ -78,6 +83,13 @@
       function refreshIcons() {
         $timeout(function () {
           if (window.lucide) window.lucide.createIcons();
+        }, 0);
+      }
+
+      function renderMermaid() {
+        $timeout(function () {
+          if (!window.mermaid) return;
+          window.mermaid.run({ querySelector: '#guide-reader .mermaid' });
         }, 0);
       }
 
@@ -105,6 +117,7 @@
           $scope.view = 'guide';
           document.title = 'Guide - Acuere';
           refreshIcons();
+          renderMermaid();
           $timeout(function () {
             var reader = document.getElementById('guide-reader');
             if (reader) reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -201,6 +214,7 @@
           $scope.guideHtml = $sce.trustAsHtml(markdownToHtml(markdown));
           $scope.view = 'guide';
           document.title = 'Guide - Acuere';
+          renderMermaid();
         });
       }).catch(function () {
         $scope.view = 'error';
