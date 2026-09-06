@@ -1,8 +1,212 @@
-<!-- Mermaid.js for diagrams -->
-<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-<script>
-  mermaid.initialize({ startOnLoad: true });
-</script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page.title | default: site.title }}</title>
 
-<!-- Markmap (optional, for heading-based mindmaps) -->
-<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
+    <style>
+      :root {
+        --ink: #26354a;
+        --muted: #718096;
+        --line: #e7ebf1;
+        --panel: #fff;
+        --blue: #2e83bb;
+        --pink: #d952a0;
+        --mint: #4fc8b1;
+        --bg: #f5f7fa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--bg);
+        font: 16px/1.7 "Trebuchet MS", Verdana, sans-serif;
+      }
+
+      main {
+        width: min(100%, 1200px);
+        margin: 0 auto;
+        padding: 2rem 1rem 4rem;
+      }
+
+      main > * {
+        max-width: 100%;
+      }
+
+      main img,
+      main svg,
+      main video,
+      main iframe,
+      main table,
+      main pre,
+      main code {
+        max-width: 100%;
+      }
+
+      main pre {
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      main table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+      }
+
+      .mermaid {
+        overflow-x: auto;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        color: #354d71;
+        line-height: 1.25;
+        word-break: break-word;
+      }
+
+      h1 {
+        margin: 0 0 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #d9f1eb;
+        font-size: clamp(2rem, 3vw, 2.75rem);
+        font-weight: 700;
+      }
+
+      h2 {
+        margin-top: 2rem;
+        font-size: clamp(1.5rem, 2.2vw, 2rem);
+      }
+
+      h3 {
+        margin-top: 1.6rem;
+        font-size: 1.2rem;
+      }
+
+      p,
+      li,
+      blockquote,
+      td,
+      th {
+        color: var(--ink);
+      }
+
+      a {
+        color: #267eb7;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code {
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: #f0f3f7;
+        color: #a13c78;
+        font-size: 0.95em;
+      }
+
+      pre {
+        overflow: auto;
+        padding: 14px;
+        border-radius: 7px;
+        background: #202b3b;
+        color: #e7eef8;
+      }
+
+      pre code {
+        padding: 0;
+        color: inherit;
+        background: transparent;
+      }
+
+      blockquote {
+        margin: 18px 0;
+        padding: 8px 16px;
+        border-left: 4px solid var(--mint);
+        color: #68768a;
+        background: #f5fbfa;
+      }
+
+      th,
+      td {
+        min-width: 120px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        text-align: left;
+      }
+
+      th {
+        background: #f3f7fb;
+      }
+
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .page-shell {
+        width: min(100%, 980px);
+        margin: 0 auto;
+        background: var(--panel);
+        border: 1px solid #e5e8ef;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(43, 63, 94, .06);
+        padding: clamp(1.25rem, 3vw, 2.5rem);
+      }
+
+      @media (max-width: 768px) {
+        body {
+          font-size: 15px;
+        }
+
+        main {
+          padding: 1rem 0.75rem 2.5rem;
+        }
+
+        .page-shell {
+          padding: 1rem 0.9rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+
+    <!-- Mermaid.js for diagrams -->
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (window.mermaid) {
+          window.mermaid.initialize({
+            startOnLoad: true,
+            securityLevel: 'loose'
+          });
+        }
+      });
+    </script>
+
+    <!-- Markmap (optional, for heading-based mindmaps) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
+  </head>
+  <body>
+    <main>
+      <div class="page-shell">
+        {{ content }}
+      </div>
+    </main>
+  </body>
+</html>
